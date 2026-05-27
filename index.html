@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex"><title>Fleetch — Accès protégé</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1565C0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.lock-card{background:#fff;border-radius:18px;max-width:380px;width:100%;padding:34px 28px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.lock-ic{width:56px;height:56px;border-radius:50%;background:#E3EFFE;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}.lock-ic i{font-size:26px;color:#1565C0}
+.lock-card h1{font-size:20px;font-weight:500;color:#1A1F2B}.lock-card p{font-size:13px;color:#6B7280;margin-top:8px;line-height:1.5}
+form{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+input{width:100%;padding:13px 14px;font-size:15px;border:.5px solid #E0E3E8;border-radius:10px;font-family:inherit;background:#F5F6F8}
+input:focus{outline:none;border-color:#1565C0;background:#fff}
+button{width:100%;padding:13px;font-size:15px;font-weight:500;color:#fff;background:#1565C0;border:none;border-radius:10px;cursor:pointer;font-family:inherit}
+button:disabled{opacity:.6;cursor:wait}
+#err{display:none;font-size:13px;color:#C62828;margin-top:4px}
+.foot{font-size:11px;color:#9299A5;margin-top:18px}
+</style></head><body>
+<div class="lock-card">
+<div class="lock-ic"><i class="ti ti-lock"></i></div>
+<h1>Accès protégé</h1>
+<p>Prototype Fleetch Driver App &mdash; réservé à l'équipe. Entre le mot de passe pour continuer.</p>
+<form id="f"><input id="pw" type="password" placeholder="Mot de passe" autocomplete="current-password" autofocus><button id="b" type="submit">Déverrouiller</button><div id="err">Mot de passe incorrect.</div></form>
+<div class="foot">Fleetch &middot; document interne</div>
+</div>
+<script>
+var CIPHER="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";var ITER=250000;
+async function dec(pw){
+  var raw=Uint8Array.from(atob(CIPHER),function(c){return c.charCodeAt(0)});
+  if(new TextDecoder().decode(raw.slice(0,8))!=="Salted__")throw 0;
+  var salt=raw.slice(8,16),data=raw.slice(16),e=new TextEncoder();
+  var km=await crypto.subtle.importKey("raw",e.encode(pw),"PBKDF2",false,["deriveBits"]);
+  var bits=new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:ITER,hash:"SHA-256"},km,384));
+  var key=await crypto.subtle.importKey("raw",bits.slice(0,32),{name:"AES-CBC"},false,["decrypt"]);
+  var pt=await crypto.subtle.decrypt({name:"AES-CBC",iv:bits.slice(32,48)},key,data);
+  return new TextDecoder().decode(pt);
+}
+async function unlock(pw,silent){
+  var b=document.getElementById("b");if(b)b.disabled=true;
+  try{
+    var html=await dec(pw);
+    if(!/<!DOCTYPE|<html/i.test(html))throw 0;
+    sessionStorage.setItem("fleetch_pw",pw);
+    document.open();document.write(html);document.close();
+  }catch(err){
+    sessionStorage.removeItem("fleetch_pw");
+    if(b)b.disabled=false;
+    if(!silent){var el=document.getElementById("err");if(el)el.style.display="block";var p=document.getElementById("pw");if(p){p.value="";p.focus();}}
+  }
+}
+window.addEventListener("DOMContentLoaded",function(){
+  document.getElementById("f").addEventListener("submit",function(ev){ev.preventDefault();unlock(document.getElementById("pw").value,false);});
+  var s=sessionStorage.getItem("fleetch_pw");if(s)unlock(s,true);
+});
+</script></body></html>
