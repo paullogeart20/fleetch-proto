@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleetch — App Chauffeur v4</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #E8EDF2; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 32px 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  .phone { width: 390px; background: #F5F6F8; border-radius: 44px; border: 8px solid #1A1F2B; overflow: hidden; box-shadow: 0 32px 80px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.1); position: relative; min-height: 844px; display: flex; flex-direction: column; }
+  .notch { background: #1A1F2B; height: 34px; display: flex; align-items: center; justify-content: center; }
+  .notch-bar { width: 120px; height: 24px; background: #1565C0; border-radius: 0 0 16px 16px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .notch-cam { width: 10px; height: 10px; border-radius: 50%; background: #1A2A3A; border: 1.5px solid #243040; }
+  .notch-mic { width: 50px; height: 5px; background: #1A2A3A; border-radius: 10px; }
+  .sbar { background: #1565C0; color: rgba(255,255,255,0.85); display: flex; justify-content: space-between; align-items: center; padding: 6px 20px 8px; font-size: 12px; font-weight: 500; }
+
+  .screen { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .tab-content { display: none; flex: 1; flex-direction: column; overflow-y: auto; }
+  .tab-content.active { display: flex; }
+
+  .hdr { background: #1565C0; padding: 14px 20px 22px; color: #fff; flex-shrink: 0; }
+  .hd-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .logo { height: 36px; width: auto; }
+
+  .sc { background: #F5F6F8; padding: 14px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .sl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: #9299A5; padding: 0 2px; }
+  .cd { background: #fff; border-radius: 12px; border: .5px solid #E0E3E8; padding: 14px 16px; }
+
+  .ir { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: .5px solid #EBEEF2; }
+  .ir:last-child { border-bottom: none; padding-bottom: 0; }
+  .ir:first-child { padding-top: 0; }
+  .ik { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6B7280; }
+  .ik i { font-size: 16px; color: #9299A5; }
+  .iv { font-size: 14px; font-weight: 500; color: #1A1F2B; text-align: right; }
+
+  .pill-blue { background: #E3EFFE; border-radius: 20px; padding: 4px 12px; text-align: right; }
+  .pill-blue .pv { font-size: 13px; font-weight: 500; color: #0C3A8A; }
+  .pill-blue .ps { font-size: 11px; color: #1565C0; margin-top: 1px; }
+  .pill-mono { background: #F0F2F5; color: #1A1F2B; font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 20px; font-family: monospace; }
+
+  .prog-bg { height: 8px; background: #EBEEF2; border-radius: 10px; overflow: hidden; }
+  .prog-fill { height: 100%; background: #1565C0; border-radius: 10px; }
+  .prog-labels { display: flex; justify-content: space-between; font-size: 11px; color: #9299A5; margin-top: 5px; }
+
+  /* DTO bar — new design */
+  .dto-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .dto-stat { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .dto-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .dto-icon i { font-size: 18px; }
+  .dto-paid { background: #1565C0; } .dto-paid i { color: #fff; }
+  .dto-rest { background: #FF8F00; } .dto-rest i { color: #fff; }
+  .dto-total { background: #4195F5; } .dto-total i { color: #fff; }
+  .dto-num { font-size: 22px; font-weight: 500; color: #1A1F2B; line-height: 1; }
+  .dto-lab { font-size: 11px; color: #9299A5; text-align: center; }
+  .dto-bar-wrap { position: relative; padding-top: 26px; margin-bottom: 6px; }
+  .dto-bar-bg { height: 16px; background: #EBEEF2; border-radius: 10px; overflow: hidden; }
+  .dto-bar-fill { height: 100%; background: linear-gradient(90deg, #1565C0, #4195F5); border-radius: 10px; }
+  .dto-pct { position: absolute; top: 0; transform: translateX(-50%); background: #1565C0; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; }
+  .dto-pct::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid #1565C0; }
+
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .bv { background: #E8F5E9; color: #1B5E20; }
+  .bw { background: #FFF8E1; color: #795200; }
+  .be { background: #FDECEA; color: #B71C1C; }
+  .bb { background: #E3EFFE; color: #0C3A8A; }
+  .bg { background: #F0F2F5; color: #6B7280; }
+  .bc { background: #C62828; color: #fff; }
+
+  /* Counters conditional formatting */
+  .ctr { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ctr i { font-size: 20px; }
+  .ctr.ok { background: #E8F5E9; } .ctr.ok i { color: #2E7D32; }
+  .ctr.warn { background: #FFF8E1; } .ctr.warn i { color: #F57F17; }
+  .ctr.crit { background: #FDECEA; } .ctr.crit i { color: #C62828; }
+
+  .inv-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; }
+  .inv-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .inv-row:first-child { padding-top: 0; }
+
+  .doc-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; }
+  .doc-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .doc-row:first-child { padding-top: 0; }
+  .di { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .di.ok { background: #E8F5E9; } .di.ok i { color: #2E7D32; font-size: 17px; }
+  .di.warn { background: #FFF8E1; } .di.warn i { color: #F57F17; font-size: 17px; }
+  .di.err { background: #FDECEA; } .di.err i { color: #C62828; font-size: 17px; }
+  .di.miss { background: #F0F2F5; } .di.miss i { color: #9299A5; font-size: 17px; }
+
+  .repair-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; cursor: pointer; }
+  .repair-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .repair-row:first-child { padding-top: 0; }
+  .repair-row:hover { background: #FAFBFC; margin: 0 -16px; padding: 10px 16px; border-radius: 8px; }
+  .sin-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; cursor: pointer; }
+  .sin-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .sin-row:first-child { padding-top: 0; }
+  .contra-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; }
+  .contra-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .contra-row:first-child { padding-top: 0; }
+
+  .tiers-track { display: flex; align-items: center; margin-top: 16px; }
+  .tier-step { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .tier-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; border: 2px solid transparent; flex-shrink: 0; }
+  .tier-dot.done { background: #1565C0; color: #fff; border-color: #1565C0; }
+  .tier-dot.current { background: #fff; color: #1565C0; border-color: #1565C0; }
+  .tier-dot.locked { background: #F0F2F5; color: #B0B7C3; border-color: #E0E3E8; }
+  .tier-line { flex: 1; height: 2px; background: #E0E3E8; margin: 0 2px; margin-bottom: 22px; }
+  .tier-line.done { background: #1565C0; }
+
+  .rule-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: .5px solid #EBEEF2; }
+  .rule-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .rule-row:first-child { padding-top: 0; }
+  .ri { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ri.plus { background: #E3EFFE; } .ri.plus i { font-size: 17px; color: #1565C0; }
+  .ri.minus { background: #FDECEA; } .ri.minus i { font-size: 17px; color: #C62828; }
+
+  .ben-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  .ben-cell { background: #F5F6F8; border-radius: 8px; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .ben-cell.locked { opacity: .4; }
+  .ben-cell i { font-size: 20px; color: #1565C0; }
+  .ben-cell.locked i { color: #9299A5; }
+
+  .toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .tsl { position: absolute; inset: 0; background: #E0E3E8; border-radius: 13px; cursor: pointer; transition: background .2s; }
+  .tsl:before { content: ''; position: absolute; width: 20px; height: 20px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: transform .2s; }
+  .toggle input:checked + .tsl { background: #1565C0; }
+  .toggle input:checked + .tsl:before { transform: translateX(18px); }
+
+  .pref-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: .5px solid #EBEEF2; }
+  .pref-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .pref-row:first-child { padding-top: 0; }
+  .pl { display: flex; align-items: center; gap: 9px; font-size: 14px; color: #1A1F2B; }
+  .pl i { font-size: 16px; color: #9299A5; }
+  .psub { font-size: 12px; color: #9299A5; margin-top: 2px; }
+
+  .arow { display: flex; align-items: center; gap: 9px; padding: 12px 0; border-bottom: .5px solid #EBEEF2; cursor: pointer; }
+  .arow:last-child { border-bottom: none; }
+  .arow:first-child { padding-top: 0; }
+
+  .cgrid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+  .cc { background: #F5F6F8; border-radius: 8px; padding: 10px 12px; }
+  .ccl { font-size: 11px; color: #9299A5; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+  .ccv { font-size: 14px; font-weight: 500; color: #1A1F2B; }
+
+  .bnav { background: #fff; border-top: .5px solid #E0E3E8; display: flex; justify-content: space-around; align-items: center; padding: 8px 0 20px; flex-shrink: 0; }
+  .ni { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; opacity: .3; cursor: pointer; transition: opacity .15s; }
+  .ni.on { opacity: 1; }
+  .ni i { font-size: 22px; color: #6B7280; }
+  .ni.on i { color: #1565C0; }
+  .nl { font-size: 10px; color: #6B7280; font-weight: 500; }
+  .ni.on .nl { color: #1565C0; }
+
+  .modal-wrap { display: none; position: fixed; inset: 0; background: rgba(26,31,43,.65); z-index: 100; align-items: flex-end; justify-content: center; }
+  .modal-wrap.open { display: flex; }
+  .msheet { background: #fff; border-radius: 20px 20px 0 0; width: 390px; max-width: 100%; padding: 20px 20px 40px; max-height: 85vh; overflow-y: auto; }
+  .mhandle { width: 36px; height: 4px; background: #E0E3E8; border-radius: 10px; margin: 0 auto 18px; }
+  .mt { font-size: 16px; font-weight: 500; color: #1A1F2B; margin-bottom: 4px; }
+  .msub { font-size: 13px; color: #9299A5; margin-bottom: 16px; }
+  .msl { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: #9299A5; margin: 14px 0 8px; }
+  .mrow { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: .5px solid #EBEEF2; font-size: 14px; }
+  .mrow:last-of-type { border-bottom: none; }
+  .mkey { color: #6B7280; }
+  .mval { font-weight: 500; color: #1A1F2B; }
+  .mbtn { width: 100%; background: #1565C0; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
+  .mclose { width: 100%; background: #F5F6F8; border: .5px solid #E0E3E8; border-radius: 8px; padding: 11px; font-size: 14px; color: #6B7280; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; }
+  .resp-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+
+  .oil-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+  .oil-cell { background: #F5F6F8; border-radius: 8px; padding: 12px; }
+  .oil-cl { font-size: 11px; color: #9299A5; margin-bottom: 5px; text-transform: uppercase; letter-spacing: .06em; }
+  .oil-cv { font-size: 15px; font-weight: 500; color: #1A1F2B; }
+  .oil-cs { font-size: 12px; color: #9299A5; margin-top: 2px; }
+
+  .alert-warn { display: flex; align-items: flex-start; gap: 8px; background: #FFF8E1; border-radius: 10px; padding: 10px 12px; border: .5px solid #FFE082; }
+  .alert-warn i { font-size: 15px; color: #F57F17; flex-shrink: 0; margin-top: 1px; }
+  .alert-warn span { font-size: 12px; color: #795200; line-height: 1.4; }
+
+  .alert-crit { display: flex; align-items: flex-start; gap: 8px; background: #FDECEA; border-radius: 10px; padding: 10px 12px; border: .5px solid #FFCDD2; }
+  .alert-crit i { font-size: 15px; color: #C62828; flex-shrink: 0; margin-top: 1px; }
+  .alert-crit span { font-size: 12px; color: #B71C1C; line-height: 1.4; }
+
+  .avatar { width: 60px; height: 60px; border-radius: 50%; background: #1565C0; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 500; color: #fff; flex-shrink: 0; position: relative; }
+  .avatar-pen { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; background: #fff; border-radius: 50%; border: .5px solid #E0E3E8; display: flex; align-items: center; justify-content: center; }
+  .avatar-pen i { font-size: 10px; color: #1565C0; }
+
+  .lang-sel { background: #F5F6F8; border: .5px solid #E0E3E8; border-radius: 8px; padding: 6px 10px; font-size: 14px; color: #1A1F2B; font-family: inherit; }
+  .mi { width: 100%; background: #F5F6F8; border: .5px solid #E0E3E8; border-radius: 8px; padding: 11px 14px; font-size: 15px; color: #1A1F2B; font-family: inherit; margin-bottom: 14px; }
+  .ml { font-size: 12px; color: #6B7280; margin-bottom: 5px; font-weight: 500; }
+
+  .lo-icon { width: 52px; height: 52px; border-radius: 50%; background: #FDECEA; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .lo-btn { width: 100%; background: #C62828; color: #fff; border: none; border-radius: 8px; padding: 12px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: inherit; margin-bottom: 10px; }
+
+  .status-card { border-radius: 12px; border: .5px solid; padding: 14px 16px; }
+  .tier-gold { background: linear-gradient(135deg,#FCF4D6,#F3E2A4); border-color:#E6CE7A; }
+  .tier-pill { display:flex; align-items:center; gap:6px; border-radius:20px; padding:6px 14px 6px 10px; font-size:14px; font-weight:500; }
+  .tier-pill.lg { padding:8px 16px 8px 12px; font-size:15px; }
+  .tp-gold { background:#F0DE97; color:#6E5400; } .tp-gold i { color:#9A7A12; }
+
+  .call-btn { display:inline-flex; align-items:center; gap:6px; background:#1565C0; color:#fff; text-decoration:none; font-size:13px; font-weight:500; padding:7px 14px; border-radius:20px; white-space:nowrap; }
+  .call-btn i { font-size:15px; }
+
+  /* Superviseur dual buttons */
+  .sup-btn { display:flex; align-items:center; justify-content:center; gap:8px; background:#1565C0; color:#fff; text-decoration:none; font-size:14px; font-weight:500; padding:11px; border-radius:8px; width:100%; border:none; cursor:pointer; font-family:inherit; }
+  .sup-btn.disabled { background:#E0E3E8; color:#9299A5; pointer-events:none; cursor:default; }
+  .sup-btn-perm { display:flex; align-items:center; justify-content:center; gap:8px; background:#1565C0; color:#fff; text-decoration:none; font-size:14px; font-weight:500; padding:11px; border-radius:8px; width:100%; border:none; cursor:pointer; font-family:inherit; }
+  .sup-btn-perm.disabled { background:#F0F2F5; color:#9299A5; border:.5px solid #E0E3E8; pointer-events:none; }
+
+  .wave-btn { display:flex; align-items:center; justify-content:center; gap:9px; width:100%; background:#1DC3FF; color:#fff; border:none; border-radius:8px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit; box-shadow:0 2px 8px rgba(29,195,255,.35); }
+  .wave-logo { width:26px; height:26px; border-radius:7px; background:#fff; overflow:hidden; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+  .scan-btn { width:34px; height:34px; border-radius:8px; background:#F0F2F5; border:.5px solid #E0E3E8; color:#1565C0; display:flex; align-items:center; justify-content:center; cursor:pointer; font-family:inherit; flex-shrink:0; }
+  .scan-btn i { font-size:17px; }
+
+  .yango-card { border-radius:12px; padding:14px 16px; border:.5px solid; }
+  .yc-champion { background: linear-gradient(135deg,#FFF1E6,#FFE0C7); border-color:#FFC499; }
+  .yango-pill { display:flex; align-items:center; gap:6px; border-radius:20px; padding:6px 14px 6px 10px; font-size:14px; font-weight:500; }
+  .yp-champion { background:#FFD0A8; color:#8E2F00; } .yp-champion i { color:#C44400; }
+  .reward-pill { background:#E8F5E9; color:#1B5E20; font-size:12px; font-weight:500; padding:4px 10px; border-radius:20px; white-space:nowrap; }
+  .reward-pill.gold { background:#FFF8E1; color:#795200; }
+  .reward-pill.plat { background:#E3EFFE; color:#0C3A8A; }
+  .yango-fill { background:#FF7128; }
+  .yango-bg { background:rgba(255,113,40,.15); }
+
+  .bell-wrap { position:relative; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+  .notif-badge { position:absolute; top:-2px; right:-6px; background:#C62828; color:#fff; font-size:9px; font-weight:600; padding:0 5px; border-radius:10px; min-width:17px; height:17px; line-height:14px; text-align:center; border:1.5px solid #1565C0; box-sizing:border-box; }
+
+  .notifs-list { max-height:55vh; overflow-y:auto; }
+  .notif-item { display:flex; gap:12px; padding:12px 0; border-bottom:.5px solid #EBEEF2; align-items:flex-start; }
+  .notif-item:last-child { border-bottom:none; }
+  .notif-ic { width:38px; height:38px; border-radius:10px; background:#E3EFFE; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .notif-ic i { font-size:18px; color:#1565C0; }
+  .notif-ic.warn { background:#FFF8E1; } .notif-ic.warn i { color:#F57F17; }
+  .notif-ic.crit { background:#FDECEA; } .notif-ic.crit i { color:#C62828; }
+  .notif-body { flex:1; }
+  .notif-title { font-size:14px; font-weight:500; color:#1A1F2B; }
+  .notif-text { font-size:12px; color:#6B7280; margin-top:3px; line-height:1.45; }
+  .notif-ts { font-size:11px; color:#9299A5; margin-top:4px; }
+
+  ::-webkit-scrollbar { width: 0; }
+
+  /* Accordion */
+  .acord { background: #fff; border-radius: 12px; border: .5px solid #E0E3E8; overflow: hidden; }
+  .acord-hdr { display: flex; align-items: center; justify-content: space-between; padding: 13px 16px; cursor: pointer; user-select: none; }
+  .acord-hdr:active { background: #FAFBFC; }
+  .acord-title { display: flex; align-items: center; gap: 9px; }
+  .acord-title i { font-size: 17px; color: #9299A5; }
+  .acord-title span { font-size: 15px; font-weight: 500; color: #1A1F2B; }
+  .acord-right { display: flex; align-items: center; gap: 8px; }
+  .acord-chev { font-size: 16px; color: #C8CDD8; transition: transform .2s; flex-shrink: 0; }
+  .acord.open .acord-chev { transform: rotate(180deg); }
+  .acord-body { display: none; border-top: .5px solid #EBEEF2; padding: 4px 16px 8px; }
+  .acord.open .acord-body { display: block; }
+  .acord-note { font-size: 11px; color: #9299A5; padding: 6px 0 4px; display: flex; align-items: center; gap: 4px; }
+
+  /* Card-internal detail toggle (Fidélité) */
+  .dtog { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: .5px solid rgba(0,0,0,.08); cursor: pointer; user-select: none; }
+  .dtog-lbl { font-size: 13px; font-weight: 500; }
+  .dtog-right { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; }
+  .dtog-right .dchev { font-size: 15px; transition: transform .2s; }
+  .dtog.open .dchev { transform: rotate(180deg); }
+  .dbody { display: none; margin-top: 12px; }
+  .dtog.open + .dbody { display: block; }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch">
+    <div class="notch-bar">
+      <div class="notch-cam"></div>
+      <div class="notch-mic"></div>
+      <div class="notch-cam"></div>
+    </div>
+  </div>
+  <div class="sbar">
+    <span>9:41</span>
+    <div style="display:flex;gap:5px;align-items:center">
+      <i class="ti ti-wifi" style="font-size:13px"></i>
+      <i class="ti ti-battery-2" style="font-size:13px"></i>
+    </div>
+  </div>
+
+  <div class="screen">
+
+    <!-- ========== TAB 1 : ACCUEIL ========== -->
+    <div class="tab-content active" id="tab-home">
+      <div class="hdr">
+        <div class="hd-top">
+          <img class="logo" src="https://paullogeart20.github.io/fleetch-website/assets/images/logos/fleetch_white_v2.png" alt="Fleetch">
+          <div class="bell-wrap" onclick="openModal('notifs')"><i class="ti ti-bell" style="font-size:22px;color:rgba(255,255,255,0.85)"></i><span class="notif-badge">2</span></div>
+        </div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.45);margin-bottom:3px">Bonjour,</div>
+        <div style="font-size:26px;font-weight:500;color:#fff;margin-bottom:14px">Kouadio Emmanuel</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.08);border:.5px solid rgba(255,255,255,0.18);border-radius:20px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.8)">
+            <i class="ti ti-car" style="font-size:12px;color:rgba(255,255,255,0.45)"></i><span>AB-445-CI</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.08);border:.5px solid rgba(255,255,255,0.18);border-radius:20px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.8)">
+            Toyota Corolla 2022
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.08);border:.5px solid rgba(255,255,255,0.18);border-radius:20px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.8)">
+            <div style="width:9px;height:9px;border-radius:50%;background:#B0BEC5;border:.5px solid rgba(255,255,255,0.3)"></div><span>Gris perle</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc">
+
+        <!-- DTO — new design -->
+        <div class="sl">Drive to Own · Contrat en cours</div>
+        <div class="cd">
+          <div class="dto-stats">
+            <div class="dto-stat">
+              <div class="dto-icon dto-paid"><i class="ti ti-check"></i></div>
+              <div class="dto-num">186</div>
+              <div class="dto-lab">Jours payés</div>
+            </div>
+            <div class="dto-stat">
+              <div class="dto-icon dto-rest"><i class="ti ti-clock"></i></div>
+              <div class="dto-num">114</div>
+              <div class="dto-lab">Restants</div>
+            </div>
+            <div class="dto-stat">
+              <div class="dto-icon dto-total"><i class="ti ti-file-text"></i></div>
+              <div class="dto-num">300</div>
+              <div class="dto-lab">Contrat</div>
+            </div>
+          </div>
+          <div class="dto-bar-wrap">
+            <div class="dto-pct" style="left:62%">62%</div>
+            <div class="dto-bar-bg"><div class="dto-bar-fill" style="width:62%"></div></div>
+          </div>
+          <div class="prog-labels"><span>0 j</span><span>150 j</span><span>300 j</span></div>
+        </div>
+
+        <!-- Alertes -->
+        <div class="sl" style="margin-top:4px">Alertes</div>
+        <div class="alert-crit">
+          <i class="ti ti-alert-circle"></i>
+          <span>Carte de stationnement expirée le 02 avr. 2026 — à renouveler.</span>
+        </div>
+        <div class="alert-warn">
+          <i class="ti ti-alert-triangle"></i>
+          <span>Assurance expire le 18 juin 2026 — dans 6 jours.</span>
+        </div>
+
+        <!-- Car check -->
+        <div class="sl" style="margin-top:4px">Car check</div>
+        <div class="cd">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="ctr warn"><i class="ti ti-clipboard-check"></i></div>
+              <div>
+                <div style="font-size:15px;font-weight:500;color:#1A1F2B">Il y a 18 jours</div>
+                <div style="font-size:12px;color:#9299A5;margin-top:2px">Effectué le 10 mai 2026</div>
+                <div style="font-size:12px;color:#F57F17;margin-top:1px">Conseillé avant le 07 juin</div>
+              </div>
+            </div>
+            <span class="badge bw">Bientôt</span>
+          </div>
+        </div>
+
+        <!-- Vidange -->
+        <div class="sl" style="margin-top:4px">Vidange</div>
+        <div class="cd">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div class="ctr warn"><i class="ti ti-droplet"></i></div>
+              <div>
+                <div style="font-size:15px;font-weight:500;color:#1A1F2B">Dans ~9 500 km</div>
+                <div style="font-size:12px;color:#9299A5;margin-top:2px">Prochaine à 97 000 km</div>
+                <div style="font-size:12px;color:#F57F17;margin-top:1px">Dernière vidange : 72 000 km</div>
+              </div>
+            </div>
+            <span class="badge bw">Bientôt</span>
+          </div>
+        </div>
+
+        <!-- Superviseur -->
+        <div class="sl" style="margin-top:4px">Superviseur</div>
+        <div class="cd">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1A1F2B">Marc Diallo</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Superviseur principal</div>
+            </div>
+            <span id="sup-status-badge" class="badge bv">Disponible</span>
+          </div>
+          <a href="tel:+2250700000000" class="sup-btn" id="btn-main">
+            <i class="ti ti-phone" style="font-size:16px"></i> Appeler mon superviseur
+          </a>
+          <div style="margin-top:10px;padding-top:10px;border-top:.5px solid #EBEEF2">
+            <div style="font-size:11px;color:#9299A5;margin-bottom:8px;text-transform:uppercase;letter-spacing:.07em">Permanence week-end</div>
+            <div style="font-size:13px;color:#6B7280;margin-bottom:8px">Kofi Mensah · +225 07 12 34 56 78</div>
+            <a href="tel:+2250712345678" class="sup-btn-perm disabled" id="btn-perm">
+              <i class="ti ti-phone" style="font-size:16px"></i> Appeler la permanence
+            </a>
+          </div>
+        </div>
+
+        <div style="height:6px"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB 2 : MON SOLDE ========== -->
+    <div class="tab-content" id="tab-solde">
+      <div class="hdr">
+        <div class="hd-top">
+          <img class="logo" src="https://paullogeart20.github.io/fleetch-website/assets/images/logos/fleetch_white_v2.png" alt="Fleetch">
+          <div class="bell-wrap" onclick="openModal('notifs')"><i class="ti ti-bell" style="font-size:22px;color:rgba(255,255,255,0.85)"></i><span class="notif-badge">2</span></div>
+        </div>
+        <div style="font-size:22px;font-weight:500;color:#fff">Mon solde</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:3px">Kouadio Emmanuel · 08h34</div>
+      </div>
+      <div class="sc">
+
+        <!-- Balance -->
+        <div class="cd" style="padding:18px 16px">
+          <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:#9299A5;margin-bottom:6px">Balance actuelle</div>
+          <div style="font-size:34px;font-weight:500;color:#C62828;margin-bottom:3px;line-height:1">−42 500 <span style="font-size:18px;color:#9299A5;font-weight:400">XOF</span></div>
+          <div style="font-size:12px;color:#9299A5;margin-bottom:16px">Dette en cours · mis à jour à 08h34</div>
+          <button class="wave-btn">
+            <span class="wave-logo"><img src="data:image/jpeg;base64,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" alt="Wave" style="width:100%;height:100%;object-fit:cover;display:block"></span>
+            Payer par Wave
+          </button>
+          <div style="font-size:11px;color:#9299A5;text-align:center;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:5px"><i class="ti ti-shield-check" style="font-size:13px"></i> Paiement mobile money sécurisé</div>
+        </div>
+
+        <!-- Recettes non payées -->
+        <div class="sl" style="margin-top:4px">Recettes</div>
+        <div class="cd">
+          <div class="inv-row">
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1A1F2B">Recette 12/06/2026</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Recette journalière</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:500"><span style="color:#C62828">0</span><span style="color:#9299A5"> / 12 000 XOF</span></div>
+              <span class="badge be" style="margin-top:4px;display:inline-block">Non payée</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Autres factures non payées -->
+        <div class="sl" style="margin-top:4px">Autres factures</div>
+        <div class="cd">
+          <div class="inv-row">
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1A1F2B">Loyer semaine · 12/06/2026</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Loyer hebdomadaire</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:500"><span style="color:#C62828">0</span><span style="color:#9299A5"> / 8 500 XOF</span></div>
+              <span class="badge be" style="margin-top:4px;display:inline-block">Non payée</span>
+            </div>
+          </div>
+          <div class="inv-row">
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1A1F2B">Loyer semaine · 05/06/2026</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Loyer hebdomadaire</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:500"><span style="color:#C62828">0</span><span style="color:#9299A5"> / 8 500 XOF</span></div>
+              <span class="badge be" style="margin-top:4px;display:inline-block">Non payée</span>
+            </div>
+          </div>
+          <div class="inv-row">
+            <div>
+              <div style="font-size:14px;font-weight:500;color:#1A1F2B">Réparation · 21/05/2026</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Changement pneu avant</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:14px;font-weight:500"><span style="color:#F57F17">1 200</span><span style="color:#9299A5"> / 3 200 XOF</span></div>
+              <span class="badge bw" style="margin-top:4px;display:inline-block">Partielle</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:6px"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB 3 : MA VOITURE ========== -->
+    <div class="tab-content" id="tab-car">
+      <div class="hdr">
+        <div class="hd-top">
+          <img class="logo" src="https://paullogeart20.github.io/fleetch-website/assets/images/logos/fleetch_white_v2.png" alt="Fleetch">
+          <div class="bell-wrap" onclick="openModal('notifs')"><i class="ti ti-bell" style="font-size:22px;color:rgba(255,255,255,0.85)"></i><span class="notif-badge">2</span></div>
+        </div>
+        <div style="font-size:22px;font-weight:500;color:#fff">Mon véhicule</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:3px">AB-445-CI · Toyota Corolla 2022</div>
+      </div>
+      <div class="sc">
+
+        <div class="sl">Dernier car check</div>
+        <div class="cd">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:20px;font-weight:500;color:#1A1F2B">Il y a 18 jours</div>
+              <div style="font-size:12px;color:#9299A5;margin-top:2px">Effectué le 10 mai 2026</div>
+            </div>
+            <span class="badge bw">Bientôt</span>
+          </div>
+          <div style="margin-top:12px;padding-top:12px;border-top:.5px solid #EBEEF2;font-size:12px;color:#9299A5;display:flex;align-items:center;gap:5px"><i class="ti ti-calendar-event" style="font-size:13px"></i>Prochain check conseillé avant le 07 juin 2026</div>
+        </div>
+
+        <div class="acord" id="acord-docs">
+          <div class="acord-hdr" onclick="toggleAccord('acord-docs')">
+            <div class="acord-title">
+              <i class="ti ti-files"></i>
+              <span>Documents du véhicule</span>
+            </div>
+            <div class="acord-right">
+              <span class="badge be">1 expiré</span>
+              <span class="badge bw" style="margin-left:2px">1 bientôt</span>
+              <i class="ti ti-chevron-down acord-chev"></i>
+            </div>
+          </div>
+          <div class="acord-body">
+            <div class="doc-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="di ok"><i class="ti ti-id"></i></div>
+                <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Carte grise</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Document permanent</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge bv">Valide</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+            </div>
+            <div class="doc-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="di warn"><i class="ti ti-shield"></i></div>
+                <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Assurance</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Expire le 18 juin 2026</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge bw">Bientôt</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+            </div>
+            <div class="doc-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="di err"><i class="ti ti-parking"></i></div>
+                <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Carte de stationnement</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Expiré le 02 avr. 2026</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge be">Expiré</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+            </div>
+            <div class="doc-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="di ok"><i class="ti ti-certificate"></i></div>
+                <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Patente</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Expire le 31 déc. 2026</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge bv">Valide</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+            </div>
+            <div class="doc-row">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="di miss"><i class="ti ti-clipboard-check"></i></div>
+                <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Visite technique</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Document non fourni</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="badge bg">Manquant</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+            </div>
+            <div class="acord-note"><i class="ti ti-camera" style="font-size:13px"></i> Touche l'icône pour photographier ou mettre à jour un document.</div>
+          </div>
+        </div>
+
+        <div class="sl" style="margin-top:4px">Vidange</div>
+        <div class="cd">
+          <div class="oil-grid">
+            <div class="oil-cell"><div class="oil-cl">Dernière vidange</div><div class="oil-cv">72 000 km</div><div class="oil-cs">14 nov. 2025</div></div>
+            <div class="oil-cell"><div class="oil-cl">Prochaine vidange</div><div class="oil-cv">97 000 km</div><div class="oil-cs">dans ~9 500 km</div></div>
+          </div>
+          <div class="alert-warn" style="margin-top:10px">
+            <i class="ti ti-alert-triangle"></i>
+            <span>Vidange à prévoir dans moins de 10 000 km</span>
+          </div>
+        </div>
+
+        <div class="acord" id="acord-rep">
+          <div class="acord-hdr" onclick="toggleAccord('acord-rep')">
+            <div class="acord-title">
+              <i class="ti ti-tool"></i>
+              <span>Réparations</span>
+            </div>
+            <div class="acord-right">
+              <span class="badge bg">3</span>
+              <i class="ti ti-chevron-down acord-chev"></i>
+            </div>
+          </div>
+          <div class="acord-body">
+            <div class="repair-row" onclick="openModal('rep1')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Remplacement plaquettes</div><div style="font-size:12px;color:#9299A5;margin-top:2px">12 avr. 2026</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:500;color:#1A1F2B">45 000 XOF</div><span class="badge be" style="margin-top:4px;display:inline-block">À ta charge</span></div>
+            </div>
+            <div class="repair-row" onclick="openModal('rep2')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Révision générale</div><div style="font-size:12px;color:#9299A5;margin-top:2px">03 fév. 2026</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:500;color:#1A1F2B">120 000 XOF</div><span class="badge bb" style="margin-top:4px;display:inline-block">Fleetch</span></div>
+            </div>
+            <div class="repair-row" onclick="openModal('rep3')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Changement pneu avant</div><div style="font-size:12px;color:#9299A5;margin-top:2px">18 déc. 2025</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:500;color:#1A1F2B">28 000 XOF</div><span class="badge be" style="margin-top:4px;display:inline-block">À ta charge</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acord" id="acord-sin">
+          <div class="acord-hdr" onclick="toggleAccord('acord-sin')">
+            <div class="acord-title">
+              <i class="ti ti-car-crash"></i>
+              <span>Sinistres</span>
+            </div>
+            <div class="acord-right">
+              <span class="badge be">1</span>
+              <span class="badge bg" style="margin-left:2px">2</span>
+              <i class="ti ti-chevron-down acord-chev"></i>
+            </div>
+          </div>
+          <div class="acord-body">
+            <div class="acord-note"><i class="ti ti-info-circle" style="font-size:13px"></i>Sous ton contrat uniquement</div>
+            <div class="sin-row" onclick="openModal('sin1')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Accrochage stationnement</div><div style="font-size:12px;color:#9299A5;margin-top:2px">08 mars 2026</div></div>
+              <span class="badge be">Responsable</span>
+            </div>
+            <div class="sin-row" onclick="openModal('sin2')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Collision en circulation</div><div style="font-size:12px;color:#9299A5;margin-top:2px">02 oct. 2025</div></div>
+              <span class="badge bv">Tiers resp.</span>
+            </div>
+            <div class="sin-row" onclick="openModal('sin3')">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Bris de glace</div><div style="font-size:12px;color:#9299A5;margin-top:2px">15 juin 2025</div></div>
+              <span class="badge bg">En analyse</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="acord" id="acord-contra">
+          <div class="acord-hdr" onclick="toggleAccord('acord-contra')">
+            <div class="acord-title">
+              <i class="ti ti-receipt-tax"></i>
+              <span>Contraventions</span>
+            </div>
+            <div class="acord-right">
+              <span class="badge be">1 non réglée</span>
+              <i class="ti ti-chevron-down acord-chev"></i>
+            </div>
+          </div>
+          <div class="acord-body">
+            <div class="contra-row">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Excès de vitesse</div><div style="font-size:12px;color:#9299A5;margin-top:2px">14 avr. 2026</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:500;color:#C62828">25 000 XOF</div><span class="badge be" style="margin-top:4px;display:inline-block">Non réglée</span></div>
+            </div>
+            <div class="contra-row">
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Stationnement interdit</div><div style="font-size:12px;color:#9299A5;margin-top:2px">02 janv. 2026</div></div>
+              <div style="text-align:right"><div style="font-size:14px;font-weight:500;color:#9299A5">5 000 XOF</div><span class="badge bv" style="margin-top:4px;display:inline-block">Réglée</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:6px"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB 4 : FIDÉLITÉ ========== -->
+    <div class="tab-content" id="tab-loyalty">
+      <div class="hdr">
+        <div class="hd-top">
+          <img class="logo" src="https://paullogeart20.github.io/fleetch-website/assets/images/logos/fleetch_white_v2.png" alt="Fleetch">
+          <div class="bell-wrap" onclick="openModal('notifs')"><i class="ti ti-bell" style="font-size:22px;color:rgba(255,255,255,0.85)"></i><span class="notif-badge">2</span></div>
+        </div>
+        <div style="font-size:22px;font-weight:500;color:#fff">Fidélité & Avantages</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:3px">Yango + Fleetch · mis à jour ce matin</div>
+      </div>
+      <div class="sc">
+
+        <!-- ⚡ YANGO -->
+        <div style="display:flex;align-items:center;gap:7px;padding:2px 2px 4px">
+          <i class="ti ti-bolt" style="font-size:14px;color:#FF7128"></i>
+          <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#FF7128">Yango</span>
+        </div>
+        <div style="background:linear-gradient(135deg,#FFF1E6,#FFE0C7);border-radius:12px;border:.5px solid #FFC499;padding:14px 16px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#9299A5;margin-bottom:6px">Statut · 342 courses ce mois</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:28px;font-weight:600;color:#8E2F00;line-height:1">Champion</div>
+            <div class="yango-pill yp-champion"><i class="ti ti-trophy" style="font-size:14px"></i><span>Champion</span></div>
+          </div>
+          <div style="font-size:12px;color:#9299A5;margin-bottom:10px">Prochain bonus : 50 courses → +3 000 FCFA</div>
+          <div class="prog-bg yango-bg" style="height:7px"><div class="prog-fill yango-fill" style="width:100%"></div></div>
+
+          <div class="dtog" id="dtog-yango" onclick="toggleDetail('dtog-yango')" style="border-top-color:rgba(255,113,40,.2)">
+            <span class="dtog-lbl" style="color:#8E2F00">Mes courses, challenges & formation</span>
+            <div class="dtog-right" style="color:#FF7128">Voir le détail <i class="ti ti-chevron-down dchev"></i></div>
+          </div>
+          <div class="dbody">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:rgba(255,255,255,.5);border-radius:8px;padding:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <div><div style="font-size:13px;font-weight:500;color:#1A1F2B">50 courses cette semaine</div><div style="font-size:11px;color:#9299A5;margin-top:1px">Termine dimanche soir</div></div>
+                  <div class="reward-pill">+3 000 FCFA</div>
+                </div>
+                <div class="prog-bg yango-bg" style="height:6px"><div class="prog-fill yango-fill" style="width:76%"></div></div>
+                <div style="font-size:11px;color:#9299A5;margin-top:5px;display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:12px"></i> 38 / 50 · 3 jours restants</div>
+              </div>
+              <div style="background:rgba(255,255,255,.5);border-radius:8px;padding:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <div><div style="font-size:13px;font-weight:500;color:#1A1F2B">100 courses cette semaine</div><div style="font-size:11px;color:#9299A5;margin-top:1px">Termine dimanche soir</div></div>
+                  <div class="reward-pill gold">+10 000 FCFA</div>
+                </div>
+                <div class="prog-bg yango-bg" style="height:6px"><div class="prog-fill yango-fill" style="width:38%"></div></div>
+                <div style="font-size:11px;color:#9299A5;margin-top:5px;display:flex;align-items:center;gap:4px"><i class="ti ti-clock" style="font-size:12px"></i> 38 / 100 · 3 jours restants</div>
+              </div>
+              <div style="background:rgba(255,255,255,.5);border-radius:8px;padding:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <div><div style="font-size:13px;font-weight:500;color:#1A1F2B">Note 4,9+ ce mois</div><div style="font-size:11px;color:#9299A5;margin-top:1px">Maintien jusqu'au 30 juin</div></div>
+                  <div class="reward-pill plat">+5 000 FCFA</div>
+                </div>
+                <div class="prog-bg yango-bg" style="height:6px"><div class="prog-fill yango-fill" style="width:92%"></div></div>
+                <div style="font-size:11px;color:#9299A5;margin-top:5px;display:flex;align-items:center;gap:4px"><i class="ti ti-star" style="font-size:12px"></i> Note : 4,91 · Objectif atteint</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⭐ FIDÉLITÉ FLEETCH -->
+        <div style="display:flex;align-items:center;gap:7px;padding:6px 2px 4px">
+          <i class="ti ti-star-filled" style="font-size:14px;color:#9A7A12"></i>
+          <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#9A7A12">Fidélité Fleetch</span>
+        </div>
+        <div style="background:linear-gradient(135deg,#FCF4D6,#F3E2A4);border-radius:12px;border:.5px solid #E6CE7A;padding:14px 16px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#9299A5;margin-bottom:6px">Statut · 650 points</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:28px;font-weight:600;color:#6E5400;line-height:1">Gold</div>
+            <div class="tier-pill tp-gold"><i class="ti ti-trophy" style="font-size:14px"></i><span>Gold</span></div>
+          </div>
+          <div style="font-size:12px;color:#9299A5;margin-bottom:10px">Encore 350 pts pour Platinum</div>
+          <div class="prog-bg" style="height:7px;background:rgba(0,0,0,.1)"><div class="prog-fill" style="width:65%"></div></div>
+          <div class="prog-labels" style="margin-top:4px"><span>Gold · 500 pts</span><span>Platinum · 1 000 pts</span></div>
+          <div class="tiers-track" style="margin-top:12px">
+            <div class="tier-step"><div class="tier-dot done"><i class="ti ti-check" style="font-size:12px"></i></div><div style="font-size:10px;font-weight:500;color:#1565C0">Bronze</div></div>
+            <div class="tier-line done"></div>
+            <div class="tier-step"><div class="tier-dot done"><i class="ti ti-check" style="font-size:12px"></i></div><div style="font-size:10px;font-weight:500;color:#1565C0">Silver</div></div>
+            <div class="tier-line done"></div>
+            <div class="tier-step"><div class="tier-dot current"><i class="ti ti-trophy" style="font-size:12px"></i></div><div style="font-size:10px;font-weight:500;color:#1565C0">Gold</div></div>
+            <div class="tier-line"></div>
+            <div class="tier-step"><div class="tier-dot locked"><i class="ti ti-lock" style="font-size:12px"></i></div><div style="font-size:10px;font-weight:500;color:#B0B7C3">Platinum</div></div>
+          </div>
+
+          <div class="dtog" id="dtog-fleetch" onclick="toggleDetail('dtog-fleetch')" style="border-top-color:rgba(230,206,122,.5)">
+            <span class="dtog-lbl" style="color:#6E5400">Mes avantages & comment gagner des points</span>
+            <div class="dtog-right" style="color:#9A7A12">Voir le détail <i class="ti ti-chevron-down dchev"></i></div>
+          </div>
+          <div class="dbody">
+            <!-- Grandes cases info -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+              <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:12px">
+                <i class="ti ti-receipt-2" style="font-size:18px;color:#1565C0;margin-bottom:6px;display:block"></i>
+                <div style="font-size:13px;font-weight:500;color:#1A1F2B">Facture payée</div>
+                <div style="font-size:20px;font-weight:600;color:#1565C0;margin-top:4px">+1 pt</div>
+                <div style="font-size:11px;color:#9299A5;margin-top:2px">par facture soldée</div>
+              </div>
+              <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:12px">
+                <i class="ti ti-clock-check" style="font-size:18px;color:#1565C0;margin-bottom:6px;display:block"></i>
+                <div style="font-size:13px;font-weight:500;color:#1A1F2B">90%+ à l'heure</div>
+                <div style="font-size:20px;font-weight:600;color:#1565C0;margin-top:4px">+20 pts</div>
+                <div style="font-size:11px;color:#9299A5;margin-top:2px">sur le mois</div>
+              </div>
+              <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:12px">
+                <i class="ti ti-car-crash" style="font-size:18px;color:#C62828;margin-bottom:6px;display:block"></i>
+                <div style="font-size:13px;font-weight:500;color:#1A1F2B">Sinistre tiers</div>
+                <div style="font-size:20px;font-weight:600;color:#C62828;margin-top:4px">−20 pts</div>
+                <div style="font-size:11px;color:#9299A5;margin-top:2px">non responsable</div>
+              </div>
+              <div style="background:rgba(255,255,255,.6);border-radius:8px;padding:12px">
+                <i class="ti ti-alert-triangle" style="font-size:18px;color:#C62828;margin-bottom:6px;display:block"></i>
+                <div style="font-size:13px;font-weight:500;color:#1A1F2B">Sinistre faute</div>
+                <div style="font-size:20px;font-weight:600;color:#C62828;margin-top:4px">−50 pts</div>
+                <div style="font-size:11px;color:#9299A5;margin-top:2px">responsable</div>
+              </div>
+            </div>
+            <!-- Avantages -->
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#9299A5;margin-bottom:8px">Avantages par statut</div>
+            <div class="ben-grid">
+              <div class="ben-cell" style="background:rgba(255,255,255,.6)"><i class="ti ti-shirt"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Goodies Fleetch</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#CD7F32;margin-right:4px;vertical-align:middle"></span>Bronze+</span></div>
+              <div class="ben-cell" style="background:rgba(255,255,255,.6)"><i class="ti ti-tool"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Priorité car check</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#9299A5;margin-right:4px;vertical-align:middle"></span>Silver+</span></div>
+              <div class="ben-cell" style="background:rgba(255,255,255,.6)"><i class="ti ti-trophy"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Concours Yango</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#1565C0;margin-right:4px;vertical-align:middle"></span>Gold+</span></div>
+              <div class="ben-cell" style="background:rgba(255,255,255,.6)"><i class="ti ti-id-badge-2"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Plaque Gold</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#1565C0;margin-right:4px;vertical-align:middle"></span>Gold+</span></div>
+              <div class="ben-cell locked" style="background:rgba(255,255,255,.4)"><i class="ti ti-refresh"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Recond. véhicule</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#B0B7C3;margin-right:4px;vertical-align:middle"></span>Platinum</span></div>
+              <div class="ben-cell locked" style="background:rgba(255,255,255,.4)"><i class="ti ti-speakerphone"></i><span style="font-size:13px;font-weight:500;color:#1A1F2B">Meeting direction</span><span style="font-size:11px;color:#9299A5"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#B0B7C3;margin-right:4px;vertical-align:middle"></span>Platinum</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:6px"></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB 5 : MON COMPTE ========== -->
+    <div class="tab-content" id="tab-profile">
+      <div class="hdr">
+        <div class="hd-top">
+          <img class="logo" src="https://paullogeart20.github.io/fleetch-website/assets/images/logos/fleetch_white_v2.png" alt="Fleetch">
+          <div class="bell-wrap" onclick="openModal('notifs')"><i class="ti ti-bell" style="font-size:22px;color:rgba(255,255,255,0.85)"></i><span class="notif-badge">2</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="avatar">KE<div class="avatar-pen"><i class="ti ti-pencil"></i></div></div>
+          <div>
+            <div style="font-size:20px;font-weight:500;color:#fff">Kouadio Emmanuel</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.45);margin-top:3px">Chauffeur · Gold · #CHA-00142</div>
+          </div>
+        </div>
+      </div>
+      <div class="sc">
+
+        <div class="sl">Documents & conformité</div>
+        <div class="cd">
+          <div class="doc-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="di ok"><i class="ti ti-license"></i></div>
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Permis de conduire</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Expire le 14 mars 2028</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge bv">Valide</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+          </div>
+          <div class="doc-row">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="di warn"><i class="ti ti-id-badge-2"></i></div>
+              <div><div style="font-size:14px;font-weight:500;color:#1A1F2B">Carte d'identité</div><div style="font-size:12px;color:#9299A5;margin-top:2px">Expire le 02 juil. 2026</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge bw">Bientôt</span><button class="scan-btn" onclick="openModal('scan-doc')"><i class="ti ti-camera"></i></button></div>
+          </div>
+        </div>
+        <div class="alert-warn">
+          <i class="ti ti-alert-triangle"></i>
+          <span>Ta carte d'identité expire dans <strong>20 jours</strong>. Contacte ton superviseur pour la renouveler.</span>
+        </div>
+
+        <div class="sl" style="margin-top:4px">Contrat chauffeur</div>
+        <a href="https://drive.google.com" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#1565C0;color:#fff;text-decoration:none;border-radius:12px;padding:16px;font-size:15px;font-weight:500;box-shadow:0 2px 10px rgba(21,101,192,.3)">
+          <i class="ti ti-file-description" style="font-size:20px"></i>
+          <div>
+            <div>Voir mon contrat Drive to Own</div>
+            <div style="font-size:11px;font-weight:400;opacity:.7;margin-top:2px">Signé le 12 jan. 2024 · En cours</div>
+          </div>
+          <i class="ti ti-external-link" style="font-size:16px;margin-left:auto;opacity:.7"></i>
+        </a>
+
+        <div class="sl" style="margin-top:4px">Préférences</div>
+        <div class="cd">
+          <div class="pref-row">
+            <div class="pl"><i class="ti ti-world"></i><span>Langue</span></div>
+            <select class="lang-sel"><option selected>Français</option><option>English</option></select>
+          </div>
+          <div class="pref-row">
+            <div class="pl"><i class="ti ti-bell"></i><div><div>Notifications push</div><div class="psub">Rappels paiement, alertes docs</div></div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="tsl"></span></label>
+          </div>
+          <div class="pref-row">
+            <div class="pl"><i class="ti ti-message"></i><div><div>SMS de rappel</div><div class="psub">Factures à venir</div></div></div>
+            <label class="toggle"><input type="checkbox"><span class="tsl"></span></label>
+          </div>
+        </div>
+
+        <div class="sl" style="margin-top:4px">Sécurité</div>
+        <div class="cd">
+          <div class="arow" onclick="openModal('phone-edit')">
+            <i class="ti ti-phone-plus" style="font-size:17px;color:#9299A5"></i>
+            <span style="font-size:14px;color:#1A1F2B;flex:1">Modifier mon numéro</span>
+            <i class="ti ti-chevron-right" style="font-size:15px;color:#C8CDD8"></i>
+          </div>
+          <div class="arow" onclick="openModal('logout')">
+            <i class="ti ti-logout" style="font-size:17px;color:#C62828"></i>
+            <span style="font-size:14px;color:#C62828;flex:1">Se déconnecter</span>
+            <i class="ti ti-chevron-right" style="font-size:15px;color:#C8CDD8"></i>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:12px 0 4px">
+          <span style="font-size:11px;color:#C8CDD8">Fleetch · v4.0.0 · Filiale Groupe H</span>
+        </div>
+        <div style="height:6px"></div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bnav">
+      <div class="ni on" id="nav-home" onclick="switchTab('home')"><i class="ti ti-home"></i><span class="nl">Accueil</span></div>
+      <div class="ni" id="nav-solde" onclick="switchTab('solde')"><i class="ti ti-receipt-2"></i><span class="nl">Mon solde</span></div>
+      <div class="ni" id="nav-car" onclick="switchTab('car')"><i class="ti ti-car"></i><span class="nl">Véhicule</span></div>
+      <div class="ni" id="nav-loyalty" onclick="switchTab('loyalty')"><i class="ti ti-star"></i><span class="nl">Fidélité</span></div>
+      <div class="ni" id="nav-profile" onclick="switchTab('profile')"><i class="ti ti-user-circle"></i><span class="nl">Compte</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<div class="modal-wrap" id="modal-rep1">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Remplacement plaquettes</div>
+    <div class="msub">12 avril 2026 · AB-445-CI</div>
+    <div class="msl">Détail</div>
+    <div class="mrow"><span class="mkey">Pièces</span><span class="mval">32 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Main d'œuvre</span><span class="mval">13 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Total</span><span class="mval">45 000 XOF</span></div>
+    <div class="msl">Prise en charge</div>
+    <span class="resp-pill be">À ta charge</span>
+    <button class="mclose" onclick="closeModal('rep1')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-rep2">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Révision générale</div>
+    <div class="msub">3 février 2026 · AB-445-CI</div>
+    <div class="msl">Détail</div>
+    <div class="mrow"><span class="mkey">Filtre + huile</span><span class="mval">28 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Courroie distribution</span><span class="mval">65 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Main d'œuvre</span><span class="mval">27 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Total</span><span class="mval">120 000 XOF</span></div>
+    <div class="msl">Prise en charge</div>
+    <span class="resp-pill bb">Prise en charge Fleetch</span>
+    <button class="mclose" onclick="closeModal('rep2')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-rep3">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Changement pneu avant</div>
+    <div class="msub">18 décembre 2025 · AB-445-CI</div>
+    <div class="msl">Détail</div>
+    <div class="mrow"><span class="mkey">Pneu Michelin 185/65 R15</span><span class="mval">22 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Pose + équilibrage</span><span class="mval">6 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Total</span><span class="mval">28 000 XOF</span></div>
+    <div class="msl">Prise en charge</div>
+    <span class="resp-pill be">À ta charge</span>
+    <button class="mclose" onclick="closeModal('rep3')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-sin1">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Accrochage stationnement</div>
+    <div class="msub">8 mars 2026 · AB-445-CI</div>
+    <div class="msl">Responsabilité</div>
+    <span class="resp-pill be" style="display:inline-flex;margin-bottom:10px"><i class="ti ti-user" style="font-size:13px"></i> Chauffeur responsable</span>
+    <div class="msl">Détails</div>
+    <div class="mrow"><span class="mkey">Lieu</span><span class="mval">Parking Plateau, Abidjan</span></div>
+    <div class="mrow"><span class="mkey">Dommages</span><span class="mval">Pare-choc arrière</span></div>
+    <div class="mrow"><span class="mkey">Coût réparation</span><span class="mval">38 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Franchise chauffeur</span><span class="mval">38 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Statut dossier</span><span class="mval">Clôturé</span></div>
+    <button class="mclose" onclick="closeModal('sin1')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-sin2">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Collision en circulation</div>
+    <div class="msub">2 octobre 2025 · AB-445-CI</div>
+    <div class="msl">Responsabilité</div>
+    <span class="resp-pill bv" style="display:inline-flex;margin-bottom:10px"><i class="ti ti-users" style="font-size:13px"></i> Tiers responsable</span>
+    <div class="msl">Détails</div>
+    <div class="mrow"><span class="mkey">Lieu</span><span class="mval">Bd de Marseille, Abidjan</span></div>
+    <div class="mrow"><span class="mkey">Dommages</span><span class="mval">Aile avant droite, phare</span></div>
+    <div class="mrow"><span class="mkey">Coût réparation</span><span class="mval">95 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Franchise chauffeur</span><span class="mval">0 XOF</span></div>
+    <div class="mrow"><span class="mkey">Statut dossier</span><span class="mval">Clôturé · remboursé</span></div>
+    <button class="mclose" onclick="closeModal('sin2')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-sin3">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Bris de glace</div>
+    <div class="msub">15 juin 2025 · AB-445-CI</div>
+    <div class="msl">Responsabilité</div>
+    <span class="resp-pill bg" style="display:inline-flex;margin-bottom:10px"><i class="ti ti-clock" style="font-size:13px"></i> En cours d'analyse</span>
+    <div class="msl">Détails</div>
+    <div class="mrow"><span class="mkey">Dommages</span><span class="mval">Pare-brise avant</span></div>
+    <div class="mrow"><span class="mkey">Coût estimé</span><span class="mval">55 000 XOF</span></div>
+    <div class="mrow"><span class="mkey">Statut dossier</span><span class="mval">En cours d'instruction</span></div>
+    <button class="mclose" onclick="closeModal('sin3')"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-notifs">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Notifications</div>
+    <div class="notifs-list">
+      <div class="notif-item">
+        <div class="notif-ic crit"><i class="ti ti-alert-circle"></i></div>
+        <div class="notif-body">
+          <div class="notif-title">Carte de stationnement expirée</div>
+          <div class="notif-text">Ton document a expiré le 02 avr. 2026. Contacte ton superviseur pour régulariser.</div>
+          <div class="notif-ts">12/06/2026</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-ic warn"><i class="ti ti-alert-triangle"></i></div>
+        <div class="notif-body">
+          <div class="notif-title">Assurance bientôt expirée</div>
+          <div class="notif-text">Ton assurance véhicule expire le 18 juin 2026 — dans 6 jours. Anticipe le renouvellement.</div>
+          <div class="notif-ts">12/06/2026</div>
+        </div>
+      </div>
+    </div>
+    <button class="mclose" onclick="closeModal('notifs')" style="margin-top:16px"><i class="ti ti-x" style="font-size:15px"></i> Fermer</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-scan-doc">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Ajouter un document</div>
+    <div class="msub">Prends une photo claire, lisible, sans reflet.</div>
+    <div style="border:2px dashed #C8CDD8;border-radius:12px;padding:34px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;color:#9299A5;margin-bottom:14px">
+      <i class="ti ti-camera" style="font-size:36px;color:#1565C0"></i>
+      <span style="font-size:13px">Touche pour prendre une photo</span>
+    </div>
+    <button class="mbtn">Envoyer le document</button>
+    <button class="mclose" onclick="closeModal('scan-doc')"><i class="ti ti-x" style="font-size:15px"></i> Annuler</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-phone-edit">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="mt">Modifier mon numéro</div>
+    <div class="msub">Un SMS de vérification sera envoyé au nouveau numéro.</div>
+    <div class="ml">Numéro actuel</div>
+    <input class="mi" type="tel" value="+225 07 00 00 00 00" disabled style="color:#9299A5">
+    <div class="ml">Nouveau numéro</div>
+    <input class="mi" type="tel" placeholder="+225 07 XX XX XX XX">
+    <button class="mbtn">Envoyer le code de vérification</button>
+    <button class="mclose" onclick="closeModal('phone-edit')"><i class="ti ti-x" style="font-size:15px"></i> Annuler</button>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-logout">
+  <div class="msheet">
+    <div class="mhandle"></div>
+    <div class="lo-icon"><i class="ti ti-logout" style="font-size:24px;color:#C62828"></i></div>
+    <div class="mt" style="text-align:center">Se déconnecter ?</div>
+    <div class="msub" style="text-align:center">Tu devras te reconnecter avec ton numéro de téléphone.</div>
+    <button class="lo-btn">Se déconnecter</button>
+    <button class="mclose" onclick="closeModal('logout')"><i class="ti ti-x" style="font-size:15px"></i> Annuler</button>
+  </div>
+</div>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('nav-' + tab).classList.add('on');
+  }
+
+  function openModal(id) {
+    document.getElementById('modal-' + id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById('modal-' + id).classList.remove('open');
+  }
+
+  // Supervisor dual-button logic: weekday = main active, weekend = permanence active
+  (function() {
+    var day = new Date().getDay(); // 0=Sun, 6=Sat
+    var isWeekend = (day === 0 || day === 6);
+    var btnMain = document.getElementById('btn-main');
+    var btnPerm = document.getElementById('btn-perm');
+    var badge = document.getElementById('sup-status-badge');
+    if (isWeekend) {
+      btnMain.classList.add('disabled');
+      btnPerm.classList.remove('disabled');
+      badge.className = 'badge bw';
+      badge.textContent = 'Permanence';
+    }
+  })();
+
+  function toggleAccord(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  function toggleDetail(id) {
+    var el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // Close modal on backdrop click
+  document.querySelectorAll('.modal-wrap').forEach(function(m) {
+    m.addEventListener('click', function(e) {
+      if (e.target === m) {
+        m.classList.remove('open');
+      }
+    });
+  });
+</script>
+</body>
+</html>
