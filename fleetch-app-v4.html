@@ -45,7 +45,8 @@
   .prog-labels { display: flex; justify-content: space-between; font-size: 11px; color: #9299A5; margin-top: 5px; }
 
   /* DTO bar — new design */
-  .dto-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .dto-stats { display: flex; gap: 8px; margin-bottom: 18px; justify-content: center; }
+  .dto-stat { flex: 0 0 calc(50% - 4px); max-width: 160px; }
   .dto-stat { display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .dto-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
   .dto-icon i { font-size: 18px; }
@@ -359,16 +360,10 @@
         <!-- Vidange -->
         <div class="sl" style="margin-top:4px">Vidange</div>
         <div class="cd">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="ctr warn"><i class="ti ti-droplet"></i></div>
-              <div>
-                <div style="font-size:15px;font-weight:500;color:#1A1F2B">Dans ~9 500 km</div>
-                <div style="font-size:12px;color:#9299A5;margin-top:2px">Prochaine à 97 000 km</div>
-                <div style="font-size:12px;color:#F57F17;margin-top:1px">Dernière vidange : 72 000 km</div>
-              </div>
-            </div>
-            <span class="badge bw">Bientôt</span>
+          <div style="font-size:13px;color:#9299A5;margin-bottom:12px">Il y a 15 500 km</div>
+          <div style="background:#FFF3E0;border:1px solid #FF8F00;border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+            <i class="ti ti-alert-triangle" style="font-size:26px;color:#E65100;flex-shrink:0"></i>
+            <div style="font-size:17px;font-weight:600;color:#E65100">Dans 9 500 km</div>
           </div>
         </div>
 
@@ -551,13 +546,10 @@
 
         <div class="sl" style="margin-top:4px">Vidange</div>
         <div class="cd">
-          <div class="oil-grid">
-            <div class="oil-cell"><div class="oil-cl">Dernière vidange</div><div class="oil-cv">72 000 km</div><div class="oil-cs">14 nov. 2025</div></div>
-            <div class="oil-cell"><div class="oil-cl">Prochaine vidange</div><div class="oil-cv">97 000 km</div><div class="oil-cs">dans ~9 500 km</div></div>
-          </div>
-          <div class="alert-warn" style="margin-top:10px">
-            <i class="ti ti-alert-triangle"></i>
-            <span>Vidange à prévoir dans moins de 10 000 km</span>
+          <div style="font-size:13px;color:#9299A5;margin-bottom:12px">Il y a 15 500 km</div>
+          <div style="background:#FFF3E0;border:1px solid #FF8F00;border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+            <i class="ti ti-alert-triangle" style="font-size:26px;color:#E65100;flex-shrink:0"></i>
+            <div style="font-size:17px;font-weight:600;color:#E65100">Dans 9 500 km</div>
           </div>
         </div>
 
